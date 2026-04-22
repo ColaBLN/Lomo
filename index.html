@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Lomo — Random Film Camera</title>
+    <meta name="theme-color" content="#0d0d0d" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="app">
+      <header class="header">
+        <h1>LOMO</h1>
+        <p>Ein Tap. Kein Preview. Pure Überraschung.</p>
+      </header>
+
+      <section class="capture-panel">
+        <button id="shootButton" class="shoot-button" type="button">Foto aufnehmen</button>
+        <input id="cameraInput" class="hidden-input" type="file" accept="image/*" capture="environment" />
+        <p id="statusText" class="status" aria-live="polite">Bereit.</p>
+      </section>
+
+      <section class="photos-section">
+        <h2>Fotos</h2>
+        <div id="photoGrid" class="photo-grid" aria-live="polite"></div>
+      </section>
+    </main>
+
+    <template id="photoCardTemplate">
+      <article class="photo-card">
+        <img alt="Lomographie Foto" loading="lazy" />
+        <time></time>
+      </article>
+    </template>
+
+    <script src="app.js" type="module"></script>
+  </body>
+</html>
