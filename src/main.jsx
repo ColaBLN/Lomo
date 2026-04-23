@@ -49,9 +49,9 @@ function App() {
       });
 
       setState("sharing");
-      setMessage("wird automatisch gespeichert.");
-      triggerAutomaticDownload(photo, objectUrlRef, cleanupTimerRef);
-      setMessage("gespeichert.");
+      setMessage("bild wird uebergeben.");
+      const handled = await saveAsPhotoFirst(photo, objectUrlRef, cleanupTimerRef);
+      setMessage(handled === "share" ? "share sheet offen. dort 'Bild sichern' waehlen." : "als datei gespeichert.");
       setState("idle");
     } catch (error) {
       clearPendingDownload();
@@ -88,6 +88,20 @@ function App() {
       </section>
     </main>
   );
+}
+
+async function saveAsPhotoFirst(file, objectUrlRef, cleanupTimerRef) {
+  if (navigator.canShare?.({ files: [file] })) {
+    await navigator.share({
+      files: [file],
+      title: file.name,
+      text: "Blindkamera",
+    });
+    return "share";
+  }
+
+  triggerAutomaticDownload(file, objectUrlRef, cleanupTimerRef);
+  return "download";
 }
 
 function triggerAutomaticDownload(file, objectUrlRef, cleanupTimerRef) {
