@@ -12,3 +12,5 @@ npm run dev
 ## Deployment
 
 GitHub Pages wird ueber den Workflow in `.github/workflows/deploy-pages.yml` veroeffentlicht.
+
+Stand: bereit fuer den ersten Pages-Deploy.
