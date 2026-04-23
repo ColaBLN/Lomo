@@ -19,11 +19,14 @@ const lomo = readFileSync(new URL("../src/services/lomo.js", import.meta.url), "
 
 const checks = [
   ["UI avoids preview elements", !app.includes("<img") && !app.includes("<canvas")],
+  ["Brand updated", app.includes("goodbylomo") && app.includes("@goodbyproduction")],
+  ["Press label present", app.includes('idle: "press"')],
   ["capture API exported", camera.includes("export async function captureBlindPhoto")],
   ["stream tracks are stopped", camera.includes("track.stop()")],
   ["JPEG export present", camera.includes('"image/jpeg"')],
   ["share sheet path present", app.includes("saveAsPhotoFirst") && app.includes("navigator.canShare") && app.includes("navigator.share")],
   ["download fallback path present", app.includes("triggerAutomaticDownload") && app.includes("link.download")],
+  ["Photo counter present", app.includes("PHOTO_COUNT_KEY") && app.includes("incrementPhotoCount")],
   ["portrait crop present", camera.includes("const PORTRAIT_RATIO = 9 / 16")],
   ["lomo API exported", lomo.includes("export function applyRandomLomoEffect")],
   ["film profile randomizer present", lomo.includes("chooseFilmProfile") && lomo.includes("addFilmBurn")],
