@@ -1,0 +1,19 @@
+{
+  "name": "Lomography Blindkamera",
+  "short_name": "Blindkamera",
+  "description": "Eine minimalistische Lomography-Blindkamera ohne Vorschau.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0f0f0d",
+  "theme_color": "#0f0f0d",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
