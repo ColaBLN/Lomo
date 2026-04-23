@@ -8,31 +8,33 @@ const statusCopy = {
   requestingPermission: "kamera wird geweckt",
   capturing: "verschluss offen",
   developing: "film wird entwickelt",
-  sharing: "bereit zum speichern",
+  sharing: "wird gesichert",
   error: "kein bild",
 };
 
 function App() {
   const [state, setState] = useState("idle");
   const [message, setMessage] = useState("nur licht.");
-  const [downloadUrl, setDownloadUrl] = useState("");
-  const [downloadName, setDownloadName] = useState("blindkamera.jpg");
   const objectUrlRef = useRef("");
+  const cleanupTimerRef = useRef(0);
 
-  const clearDownload = useCallback(() => {
+  const clearPendingDownload = useCallback(() => {
+    if (cleanupTimerRef.current) {
+      window.clearTimeout(cleanupTimerRef.current);
+      cleanupTimerRef.current = 0;
+    }
     if (objectUrlRef.current) {
       URL.revokeObjectURL(objectUrlRef.current);
       objectUrlRef.current = "";
     }
-    setDownloadUrl("");
   }, []);
 
-  useEffect(() => clearDownload, [clearDownload]);
+  useEffect(() => clearPendingDownload, [clearPendingDownload]);
 
   const handleCapture = async () => {
     if (state !== "idle" && state !== "error" && state !== "sharing") return;
 
-    clearDownload();
+    clearPendingDownload();
 
     try {
       setState("requestingPermission");
@@ -42,30 +44,17 @@ function App() {
       const photo = await captureBlindPhoto({
         onDeveloping: () => {
           setState("developing");
-          setMessage("farben kippen, koernung kommt.");
+          setMessage("film burn, koernung, zufallslook.");
         },
       });
 
       setState("sharing");
-      setDownloadName(photo.name);
-
-      if (navigator.canShare?.({ files: [photo] })) {
-        await navigator.share({
-          files: [photo],
-          title: "Blindkamera",
-          text: "Lomography Blindkamera",
-        });
-        setMessage("gespeichert oder geteilt.");
-        setState("idle");
-        return;
-      }
-
-      const url = URL.createObjectURL(photo);
-      objectUrlRef.current = url;
-      setDownloadUrl(url);
-      setMessage("share sheet fehlt. speichern ist bereit.");
+      setMessage("wird automatisch gespeichert.");
+      triggerAutomaticDownload(photo, objectUrlRef, cleanupTimerRef);
+      setMessage("gespeichert.");
+      setState("idle");
     } catch (error) {
-      clearDownload();
+      clearPendingDownload();
       setState("error");
       setMessage(error instanceof Error ? error.message : "die kamera hat nicht geantwortet.");
     }
@@ -96,14 +85,31 @@ function App() {
           <p className="status">{statusCopy[state]}</p>
           <p className="message">{message}</p>
         </div>
-        {downloadUrl ? (
-          <a className="save-link" href={downloadUrl} download={downloadName}>
-            Speichern
-          </a>
-        ) : null}
       </section>
     </main>
   );
+}
+
+function triggerAutomaticDownload(file, objectUrlRef, cleanupTimerRef) {
+  const url = URL.createObjectURL(file);
+  objectUrlRef.current = url;
+
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = file.name;
+  link.rel = "noopener";
+  link.style.display = "none";
+  document.body.append(link);
+  link.click();
+  link.remove();
+
+  cleanupTimerRef.current = window.setTimeout(() => {
+    URL.revokeObjectURL(url);
+    if (objectUrlRef.current === url) {
+      objectUrlRef.current = "";
+    }
+    cleanupTimerRef.current = 0;
+  }, 9000);
 }
 
 createRoot(document.getElementById("root")).render(
