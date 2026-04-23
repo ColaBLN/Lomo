@@ -3,18 +3,20 @@ import { createRoot } from "react-dom/client";
 import { captureBlindPhoto } from "./services/camera.js";
 import "./styles.css";
 
+const PHOTO_COUNT_KEY = "goodbylomo-photo-count";
+
 const statusCopy = {
-  idle: "bereit",
-  requestingPermission: "kamera wird geweckt",
-  capturing: "verschluss offen",
-  developing: "film wird entwickelt",
-  sharing: "wird gesichert",
-  error: "kein bild",
+  idle: "press",
+  requestingPermission: "wake",
+  capturing: "hold",
+  developing: "develop",
+  sharing: "save",
+  error: "again",
 };
 
 function App() {
   const [state, setState] = useState("idle");
-  const [message, setMessage] = useState("nur licht.");
+  const [photoCount, setPhotoCount] = useState(() => readPhotoCount());
   const objectUrlRef = useRef("");
   const cleanupTimerRef = useRef(0);
 
@@ -38,34 +40,31 @@ function App() {
 
     try {
       setState("requestingPermission");
-      setMessage("kamera wird gefragt.");
 
       setState("capturing");
       const photo = await captureBlindPhoto({
         onDeveloping: () => {
           setState("developing");
-          setMessage("film burn, koernung, zufallslook.");
         },
       });
 
       setState("sharing");
-      setMessage("bild wird uebergeben.");
-      const handled = await saveAsPhotoFirst(photo, objectUrlRef, cleanupTimerRef);
-      setMessage(handled === "share" ? "share sheet offen. dort 'Bild sichern' waehlen." : "als datei gespeichert.");
+      await saveAsPhotoFirst(photo, objectUrlRef, cleanupTimerRef);
+      incrementPhotoCount(setPhotoCount);
       setState("idle");
-    } catch (error) {
+    } catch {
       clearPendingDownload();
       setState("error");
-      setMessage(error instanceof Error ? error.message : "die kamera hat nicht geantwortet.");
     }
   };
 
   const busy = state === "requestingPermission" || state === "capturing" || state === "developing";
+  const showInstagram = photoCount >= 3;
 
   return (
     <main className="app-shell" aria-live="polite">
-      <section className="camera-face" aria-label="Lomography Blindkamera">
-        <p className="kicker">blindkamera</p>
+      <section className="camera-face" aria-label="goodbylomo camera">
+        <p className="kicker">goodbylomo</p>
         <div className="meter" aria-hidden="true">
           <span />
           <span />
@@ -73,17 +72,24 @@ function App() {
           <span />
         </div>
         <button
-          className="shutter"
+          className={`shutter ${!busy ? "shutter-prompt" : ""}`}
           type="button"
           onClick={handleCapture}
           disabled={busy}
-          aria-label="Blindfoto aufnehmen"
+          aria-label="Take photo"
         >
+          <span className="shutter-ring" aria-hidden="true" />
           <span className="shutter-core" />
         </button>
         <div className="status-block">
           <p className="status">{statusCopy[state]}</p>
-          <p className="message">{message}</p>
+        </div>
+        <div className="footer-slot">
+          {showInstagram ? (
+            <a className="instagram-link" href="https://instagram.com/goodbyproduction" target="_blank" rel="noreferrer">
+              @goodbyproduction
+            </a>
+          ) : null}
         </div>
       </section>
     </main>
@@ -102,6 +108,26 @@ async function saveAsPhotoFirst(file, objectUrlRef, cleanupTimerRef) {
 
   triggerAutomaticDownload(file, objectUrlRef, cleanupTimerRef);
   return "download";
+}
+
+function readPhotoCount() {
+  try {
+    const raw = window.localStorage.getItem(PHOTO_COUNT_KEY);
+    const value = Number(raw);
+    return Number.isFinite(value) && value > 0 ? value : 0;
+  } catch {
+    return 0;
+  }
+}
+
+function incrementPhotoCount(setPhotoCount) {
+  setPhotoCount((current) => {
+    const next = current + 1;
+    try {
+      window.localStorage.setItem(PHOTO_COUNT_KEY, String(next));
+    } catch {}
+    return next;
+  });
 }
 
 function triggerAutomaticDownload(file, objectUrlRef, cleanupTimerRef) {
