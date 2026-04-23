@@ -1,7 +1,7 @@
 {
-  "name": "Lomography Blindkamera",
-  "short_name": "Blindkamera",
-  "description": "Eine minimalistische Lomography-Blindkamera ohne Vorschau.",
+  "name": "goodbylomo",
+  "short_name": "goodbylomo",
+  "description": "goodbylomo",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
