@@ -46,7 +46,7 @@ a {
   width: min(100%, 393px);
   min-height: min(760px, calc(100dvh - 52px));
   display: grid;
-  grid-template-rows: auto 1fr auto auto auto;
+  grid-template-rows: auto auto 1fr auto auto;
   align-items: center;
   justify-items: center;
   gap: 22px;
@@ -93,6 +93,7 @@ a {
 .shutter {
   width: clamp(172px, 54vw, 224px);
   aspect-ratio: 1;
+  position: relative;
   display: grid;
   place-items: center;
   border: 0;
@@ -110,6 +111,18 @@ a {
     transform 180ms ease,
     filter 180ms ease,
     opacity 180ms ease;
+}
+
+.shutter-ring {
+  position: absolute;
+  inset: -16px;
+  border-radius: 999px;
+  border: 1px solid rgba(238, 232, 216, 0.22);
+  opacity: 0.7;
+}
+
+.shutter-prompt .shutter-ring {
+  animation: pulse-ring 2.8s ease-in-out infinite;
 }
 
 .shutter:active:not(:disabled) {
@@ -138,44 +151,50 @@ a {
 }
 
 .status-block {
-  min-height: 90px;
+  min-height: 56px;
   display: grid;
   align-content: start;
-  gap: 9px;
   text-align: center;
 }
 
-.status,
-.message {
-  margin: 0;
-}
-
 .status {
+  margin: 0;
   color: #eee8d8;
-  font-size: clamp(1.55rem, 9vw, 2.2rem);
+  font-size: clamp(1.4rem, 7vw, 1.95rem);
   font-weight: 760;
   line-height: 0.98;
+  text-transform: lowercase;
 }
 
-.message {
-  max-width: 25ch;
-  color: rgba(238, 232, 216, 0.68);
-  font-size: 0.95rem;
-  line-height: 1.45;
+.footer-slot {
+  min-height: 28px;
+  display: grid;
+  align-items: end;
 }
 
-.save-link {
-  min-width: 150px;
-  min-height: 48px;
-  display: inline-grid;
-  place-items: center;
-  padding: 0 22px;
-  border: 1px solid rgba(238, 232, 216, 0.28);
-  border-radius: 999px;
-  color: #0f0f0d;
-  background: #eee8d8;
+.instagram-link {
+  color: rgba(238, 232, 216, 0.46);
   text-decoration: none;
-  font-weight: 760;
+  font-size: 0.8rem;
+  line-height: 1;
+}
+
+.instagram-link:focus-visible,
+.instagram-link:hover {
+  color: rgba(238, 232, 216, 0.74);
+}
+
+@keyframes pulse-ring {
+  0%,
+  100% {
+    transform: scale(0.98);
+    opacity: 0.34;
+  }
+
+  50% {
+    transform: scale(1.04);
+    opacity: 0.78;
+  }
 }
 
 @media (max-height: 690px) {
@@ -189,6 +208,6 @@ a {
   }
 
   .status-block {
-    min-height: 76px;
+    min-height: 44px;
   }
 }
