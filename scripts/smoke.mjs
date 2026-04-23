@@ -22,8 +22,10 @@ const checks = [
   ["capture API exported", camera.includes("export async function captureBlindPhoto")],
   ["stream tracks are stopped", camera.includes("track.stop()")],
   ["JPEG export present", camera.includes('"image/jpeg"')],
-  ["share sheet path present", app.includes("navigator.share") && app.includes("navigator.canShare")],
+  ["auto download path present", app.includes("triggerAutomaticDownload") && app.includes("link.download")],
+  ["portrait crop present", camera.includes("const PORTRAIT_RATIO = 9 / 16")],
   ["lomo API exported", lomo.includes("export function applyRandomLomoEffect")],
+  ["film profile randomizer present", lomo.includes("chooseFilmProfile") && lomo.includes("addFilmBurn")],
 ];
 
 const failed = checks.filter(([, passed]) => !passed);
