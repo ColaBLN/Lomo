@@ -1,6 +1,7 @@
 import { applyRandomLomoEffect } from "./lomo.js";
 
-const MAX_EXPORT_EDGE = 2200;
+const PORTRAIT_RATIO = 9 / 16;
+const MAX_EXPORT_HEIGHT = 2304;
 const READY_TIMEOUT_MS = 4500;
 
 export async function captureBlindPhoto({ onDeveloping } = {}) {
@@ -116,16 +117,31 @@ function waitForFrame(video) {
 function drawVideoFrame(video) {
   const sourceWidth = video.videoWidth;
   const sourceHeight = video.videoHeight;
-  const scale = Math.min(1, MAX_EXPORT_EDGE / Math.max(sourceWidth, sourceHeight));
-  const width = Math.max(1, Math.round(sourceWidth * scale));
-  const height = Math.max(1, Math.round(sourceHeight * scale));
+  const sourceRatio = sourceWidth / sourceHeight;
+
+  let cropWidth = sourceWidth;
+  let cropHeight = sourceHeight;
+  let offsetX = 0;
+  let offsetY = 0;
+
+  if (sourceRatio > PORTRAIT_RATIO) {
+    cropWidth = Math.round(sourceHeight * PORTRAIT_RATIO);
+    offsetX = Math.round((sourceWidth - cropWidth) / 2);
+  } else {
+    cropHeight = Math.round(sourceWidth / PORTRAIT_RATIO);
+    offsetY = Math.round((sourceHeight - cropHeight) / 2);
+  }
+
+  const scale = Math.min(1, MAX_EXPORT_HEIGHT / cropHeight);
+  const height = Math.max(1, Math.round(cropHeight * scale));
+  const width = Math.max(1, Math.round(height * PORTRAIT_RATIO));
 
   const canvas = document.createElement("canvas");
   canvas.width = width;
   canvas.height = height;
 
   const context = canvas.getContext("2d", { colorSpace: "srgb" });
-  context.drawImage(video, 0, 0, width, height);
+  context.drawImage(video, offsetX, offsetY, cropWidth, cropHeight, 0, 0, width, height);
   return canvas;
 }
 
